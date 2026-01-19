@@ -1,18 +1,24 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0.404 AS build
 WORKDIR /src
-COPY ["SuperChiki2.csproj", "./"]
-RUN dotnet restore "SuperChiki2.csproj"
+
+# Cambiar aquí el nombre del proyecto
+COPY ["ListaSupermercado.csproj", "./"]
+RUN dotnet restore "ListaSupermercado.csproj"
+
 COPY . .
-RUN dotnet build "SuperChiki2.csproj" -c Release -o /app/build
+RUN dotnet build "ListaSupermercado.csproj" -c Release -o /app/build
 
+# Publish stage
 FROM build AS publish
-RUN dotnet publish "SuperChiki2.csproj" -c Release -o /app/publish
+RUN dotnet publish "ListaSupermercado.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.11 AS final
 WORKDIR /app
+EXPOSE 8080
+
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SuperChiki2.dll"]
+
+# Cambiar también el nombre del DLL
+ENTRYPOINT ["dotnet", "ListaSupermercado.dll"]
