@@ -1,34 +1,31 @@
 using Microsoft.EntityFrameworkCore;
-using SuperChikis2.Data;
+using ListaSupermercado.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar para escuchar en el puerto 8080 (requerido por Easypanel)
+// Configurar puerto dinámico (Railway usa la variable PORT)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(8080);
+    options.ListenAnyIP(int.Parse(port));
 });
 
-// 1. Agrega los controladores con vistas
+// Agregar servicios
 builder.Services.AddControllersWithViews();
 
-// 2. Configura la conexión (fíjate en la 'g' de UseNpgsql)
+// Configurar base de datos
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 var app = builder.Build();
 
-// 3. Configuración básica (sin Identity)
+// Configuración para producción
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // Agregar HSTS para producción
     app.UseHsts();
 }
-
-// Redirección HTTPS (comentado porque Easypanel maneja HTTPS)
-// app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseRouting();
