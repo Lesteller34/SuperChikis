@@ -27,10 +27,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 app.UseAuthorization();
 
+// Redirección explícita para la raíz "/"
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/Productos/Index");
+    return Task.CompletedTask;
+});
+
+// Rutas por defecto
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Productos}/{action=Index}/{id?}");
